@@ -4,8 +4,12 @@ import AppLayout from "../components/AppLayout/AppLayout";
 
 export default function Success() {
   return (
-    <div>
-      Thank you for your purchase.
+    <div className="h-full overflow-hidden">
+      <div className="w-full h-full flex flex-col overflow-auto">
+        <div className="bs-card">
+          <h2 className="text-center">Thank you for your purchase!</h2>
+        </div>
+      </div>
     </div>
   )
 }

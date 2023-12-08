@@ -22,6 +22,15 @@ export default withApiAuthRequired(async function handler(req, res) {
   const openai = new OpenAIApi(config);
 
   const { topic, keywords } = req.body
+
+  if (!topic.trim() || !keywords.trim()) {
+    return res.status(422);
+  }
+
+  if (topic.length > 80 || keywords.length > 80) {
+    return res.status(422);
+  }
+
   try {
     const tags = "h1, h2, h3, h4, h5, h6, strong, li, ol, ul, i"
 
