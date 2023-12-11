@@ -1,13 +1,28 @@
-import React from 'react'
+import { useContext, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useUser } from '@auth0/nextjs-auth0/client'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
 import Logo from '../Logo/Logo';
+import PostsContext from '../../context/postsContext';
 
-export default function AppLayout({ children, availableTokens, posts, postId }) {
+export default function AppLayout({ children, availableTokens, posts: postsFromSSR, postId, postCreated }) {
   const { user } = useUser();
+
+  const { setPostsFromSSR, posts, getPosts, noMorePosts } = useContext(PostsContext)
+
+  useEffect(() => {
+    setPostsFromSSR(postsFromSSR)
+    if (postId) {
+      const exists = postsFromSSR.find(post => post._id === postId);
+      if (!exists) {
+        getPosts({ getNewerPosts: true, lastPostDate: postCreated })
+      }
+    }
+  }, [getPosts, postId, postsFromSSR, setPostsFromSSR, postCreated])
+
+  const handleClick = () => getPosts({ lastPostDate: posts[posts.length - 1]?.created })
 
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen max-h-screen">
@@ -23,7 +38,7 @@ export default function AppLayout({ children, availableTokens, posts, postId }) 
           </Link>
         </div>
         <div className="px-4 flex-1 overflow-auto bg-gradient-to-b from-slate-800 to-cyan-800">
-          {posts.map(post => (
+          {posts?.map(post => (
             <Link
               className={`
                 border 
@@ -49,6 +64,14 @@ export default function AppLayout({ children, availableTokens, posts, postId }) 
               {post.topic}
             </Link>
           ))}
+          {!noMorePosts && (
+            <div
+              onClick={handleClick}
+              className="hover:underline text-sm text-slate-400 text-center cursor-pointer mt-4"
+            >
+              Load more posts
+            </div>
+          )}
         </div>
         <div className="bg-cyan-800 flex items-center gap-2 border-t border-t-black/50 h-20 px-2">
           {!!user ? (
